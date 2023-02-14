@@ -6,7 +6,7 @@ install.packages("wooldridge") # APENAS SE NÃO TIVER INSTALADO
 install.packages("tidyverse") # APENAS SE NÃO TIVER INSTALADO
 
 
-#===============================================================================
+# ===============================================================================
 
 
 # C9 - capítulo 3
@@ -55,7 +55,7 @@ summary(regressao_c9_iv)
 # O efeito causado é a inversão do sinal do estimador de giftlast, ou seja, a quantidade de presente está negativamente relacionada com o presente mais recente.
 
 
-#===============================================================================
+# ===============================================================================
 
 
 # C11 - capítulo 3
@@ -92,33 +92,36 @@ cor(meapsingle$lmedinc, meapsingle$free)
 
 # iv)
 
-# Sim. Matematicamente, correlações altas entre as variáveis independentes causam uma instabilidade numérica ao ajustar a curva de regressão, o chamado efeito de multicolinearidade. Uma das consequências da multicolinearidade é a elevação dos erros-padrão, como observado no erro-padrão o intercepto
+# Sim. Matematicamente, correlações altas entre as variáveis independentes causam uma instabilidade numérica ao ajustar a curva de regressão, o chamado efeito de multicolinearidade. Uma das consequências da multicolinearidade é a elevação dos erros-padrão, como observado no erro-padrão do intercepto
 
 # v)
 
 install.packages("faraway") # Instalando biblioteca para usar função vif(fator de inflação de variânica)
 require(faraway)
 
-dados <- data.frame(pctsgle = meapsingle$pctsgle,
-                    free = meapsingle$free,
-                    lmedinc = meapsingle$lmedinc)
+dados <- data.frame(
+  pctsgle = meapsingle$pctsgle,
+  free = meapsingle$free,
+  lmedinc = meapsingle$lmedinc
+)
 vif(dados)
 
 # pctsgle e lmedinc possuem os maiores FIVs. FIVs maiores que 1 indicam multicolinearidade entre as variáveis.
 
 
-#===============================================================================
+# ===============================================================================
 
 
 # C04 - capítulo 7
 
-# i) 
+# i)
 
 # B4 > 0, quanto melhor a nota no sat, melhor o desempenho na faculdade. Suponho que B6 < 0, ou seja, atletas performam pior. Os sinais de B1 e B5 não são claros.
 
 # ii)
 
 view(gpa2)
+
 
 regressao_c04_ii <- lm(colgpa ~ hsize + hsizesq + hsperc + sat + female + athlete, data = gpa2)
 summary(regressao_c04)
@@ -144,9 +147,11 @@ df$male_athlete <- !gpa2$female & gpa2$athlete
 df$male_non_athlete <- !gpa2$female & !gpa2$athlete
 view(df)
 
-regressao_c04_iv <- lm(colgpa ~ hsize + hsizesq + hsperc + sat + 
-                         female_athlete + male_athlete + male_non_athlete,
-                       data = df)
+regressao_c04_iv <- lm(
+  colgpa ~ hsize + hsizesq + hsperc + sat +
+    female_athlete + male_athlete + male_non_athlete,
+  data = df
+)
 summary(regressao_c04_iv)
 
 # colgpa = 1.396 - .0568(hsize) + .00467(hsizesq) - .01321(hsperc) + .001646(sat) + .1751(female_athlete) + .0128(male_athlete) - 0.1546(male_non_athlete)
@@ -156,7 +161,7 @@ summary(regressao_c04_iv)
 # A nota de mulheres atletas é de 0,175 mais pontos.
 
 
-#===============================================================================
+# ===============================================================================
 
 
 # C12 - capítulo 7
