@@ -13,6 +13,7 @@ output: pdf_document
 require(wooldridge) # Importando biblioteca com dados do livro
 require(tidyverse) # Importando biblitoeca para visualização dos dados
 require(faraway) # Importando biblioteca para calcular FIVs
+library(dplyr)
 ```
 
 ## C09 - Capítulo 3
@@ -58,7 +59,7 @@ summary(regressao_c9_iv)
 
 <p>**R: O efeito causado é uma redução no estimador da variável mailsyear**<p>
 
-###5.In the equation from part (iv), what has happened to the coefficient on giftlast? What do you think is happening?
+### 5.In the equation from part (iv), what has happened to the coefficient on giftlast? What do you think is happening?
 
 <p>**O efeito causado é a inversão do sinal do estimador de giftlast, ou seja, a quantidade de presente está negativamente relacionada com o presente mais recente.**<p>
 
@@ -149,7 +150,6 @@ df <- gpa2
 df$female_athlete <- gpa2$female & gpa2$athlete
 df$male_athlete <- !gpa2$female & gpa2$athlete
 df$male_non_athlete <- !gpa2$female & !gpa2$athlete
-
 regressao_c04_iv <- lm(
   colgpa ~ hsize + hsizesq + hsperc + sat +
     female_athlete + male_athlete + male_non_athlete,
@@ -163,9 +163,7 @@ summary(regressao_c04_iv)
 ### 5.Does the effect of sat on colgpa differ by gender? Justify your answer.
 
 ``` {r C04.v}
-
 df$female_sat <- gpa2$female * gpa2$sat
-
 regressao_c04_v <- lm(colgpa ~ hsize + hsizesq + hsperc + sat + female + athlete + female_sat, data = df)
 summary(regressao_c04_v)
 ```
@@ -181,54 +179,46 @@ summary(regressao_c04_v)
 ### 1.Find the separate fractions of men and women that are classified as having above average looks. Are more people rated as having above average or below average looks?
 
 ``` {r C12.i}
-
 women_above <- beauty[which(beauty$abvavg & beauty$female), ]
 men_above <- beauty[which(beauty$abvavg & !beauty$female), ]
-above_avg <- dplyr::bind_rows(women_above, men_above)
-
+above_avg <- bind_rows(women_above, men_above)
 women_below <- beauty[which(beauty$belavg & beauty$female), ]
 men_below <- beauty[which(beauty$belavg & !beauty$female), ]
-below_avg <- dplyr::bind_rows(women_below, men_below)
-
+below_avg <- bind_rows(women_below, men_below)
 women_avg <- beauty[which(!beauty$abvavg & !beauty$belavg & beauty$female), ]
 men_avg <- beauty[which(!beauty$abvavg & !beauty$belavg & !beauty$female), ]
-on_avg <- dplyr::bind_rows(women_avg, men_avg)
-
-total_women <- dplyr::bind_rows(women_above, women_avg, women_below)
-total_men <- dplyr::bind_rows(men_above, men_avg, men_below)
-
-
-fraction_women_above <- round(dplyr::count(women_above)/dplyr::count(total_women), 2)$n
-fraction_men_above <- round(dplyr::count(men_above)/dplyr::count(total_men), 2)$n
-fraction_women_below <- round(dplyr::count(women_below)/dplyr::count(total_women), 2)$n
-fraction_men_below <- round(dplyr::count(men_below)/dplyr::count(total_men), 2)$n
-
+on_avg <- bind_rows(women_avg, men_avg)
+total_women <- bind_rows(women_above, women_avg, women_below)
+total_men <- bind_rows(men_above, men_avg, men_below)
+fraction_women_above <- round(count(women_above)/count(total_women), 2)$n
+fraction_men_above <- round(count(men_above)/count(total_men), 2)$n
+fraction_women_below <- round(count(women_below)/count(total_women), 2)$n
+fraction_men_below <- round(count(men_below)/count(total_men), 2)$n
 ```
 
-* | Mulheres | Homens
+Resultado | Mulheres | Homens
 :---|:---:|:---:
 Acima | 0,33 | 0,29
 Abaixo | 0,14 | 0,12
 
-### 2.Test the null hypothesis that the population fractions of above-average-looking women and men are the same. Report the one-sided p-value that the fraction is higher for women. (Hint: Estimating a simple linear probability model is easiest.)<p>
+### 2.Test the null hypothesis that the population fractions of above-average-looking women and men are the same. Report the one-sided p-value that the fraction is higher for women. (Hint: Estimating a simple linear probability model is easiest.)
 
 ``` {r C12.ii}
 regressao_c12_ii <- lm(female ~ abvavg, data = beauty)
 summary(regressao_c12_ii)
 ```
 
-<p>**R: A diferença é de apenas 4%, ou seja, o percentual de mulheres acima da média é um pouco maior do que homens acima da média. A estatística t = 1,48, indica que não existe uma forte evidência de que as populações são as mesmas.**
+<p>**R: A diferença é de apenas 4%, ou seja, o percentual de mulheres acima da média é um pouco maior do que homens acima da média. A estatística t = 1,48, indica que não existe uma forte evidência de que as populações são as mesmas.**<p>
 
 ### 3.Now estimate the model
 
 **log(wage) = b0 + b1belavg + b2abvavg + u**
 
-<p>separately for men and women, and report the results in the usual form. In both cases, interpret the coefficient on belavg. Explain in words what the hypothesis H0: b1 = 0 against H1: b1 ≠ 0 means, and find the p-values for men and women.<p>
+<p>separately for men and women, and report the results in the usual form. In both cases, interpret the coefficient on belavg. Explain in words what the hypothesis H0: b1 = 0 against H1: b1 != 0 means, and find the p-values for men and women.<p>
 
 ``` {r C12.iii}
 regressao_c12_men <- lm(lwage ~ belavg + abvavg, data = total_men)
 summary(regressao_c12_men)
-
 regressao_c12_women <- lm(lwage ~ belavg + abvavg, data = total_women)
 summary(regressao_c12_women)
 ```
@@ -246,12 +236,10 @@ regressao_c12_men <- lm(lwage ~ belavg + abvavg + educ + exper + expersq
                         + union + goodhlth + black + married
                         + south + bigcity + smllcity + service, data = total_men)
 summary(regressao_c12_men)
-
 regressao_c12_women <- lm(lwage ~ belavg + abvavg + educ + exper + expersq 
                         + union + goodhlth + black + married +
                         south + bigcity + smllcity + service, data = total_women)
 summary(regressao_c12_women)
-
 ```
 
 <p>**R: Os coeficientes em ambos os casos não se alteram tanto, mesmo com a adição do controle de outras variáveis estatísticamente significantes.**<p>

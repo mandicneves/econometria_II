@@ -130,7 +130,7 @@ summary(regressao_c04)
 #         (7.949) (1.635)       (2.249)           (5.728)         (6.682)      (1.800)         (4.235)
 # n = 4137  R² = 0,2925
 
-# Para atletas o resultado em colgpa é um aumento de 0,169 pontos. O coeficiente é estatísticamente significante
+# Para atletas o resultado em colgpa é um aumento de 0,169 pontos. O coeficiente é estatísticamente significante.
 
 # iii)
 
@@ -176,6 +176,8 @@ women_below <- beauty[which(beauty$belavg & beauty$female), ]
 men_above <- beauty[which(beauty$abvavg & !beauty$female), ]
 men_below <- beauty[which(beauty$belavg & !beauty$female), ]
 
+count(women_above)/count(women_below)
+count(men_above)/count(men_below)
 
 view(women_above)
 # Existem 144 mulheres acima da média e 239 homens acima da média. Existem 59 mulheres abaixo da média e 96 homens abaixo da média. Portanto, existem mais pessoas acima da média do que abaixo da média.
