@@ -1,0 +1,186 @@
+---
+title: "Lista_02_Econometria_II"
+author: "Marcelo Neves Lira"
+date: 
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+require(wooldridge)
+require(tidyverse)
+require(dplyr)
+```
+
+## 1. Exercício 11 - Capítulo 07
+
+The following equations were estimated using the data in ECONMATH, with standard errors reported under coefficients. The average class score, measured as a percentage, is about 72.2; exactly 50% of the students are male; and the average of colgpa (grade point average at the start of the term) is about 2.81.
+
+$$\widehat {score} = 32.31 + 14.32 colgpa$$
+$$\qquad (2.00) \qquad (0.70)$$
+$$n = 856 \quad R^2 = 0.329 \quad \bar R^2 = 0.328$$
+
+$$\widehat {score} = 29.66 + 3.83 male + 14.57 colgpa$$
+$$\qquad (2.04) \quad (0.74) \qquad\qquad (0.69)$$
+$$n = 856 \quad R^2 = 0.349 \quad \bar R^2 = 0.348$$
+
+$$\widehat {score} = 30.36 + 2.47 male + 14.33 colgpa + 0.479 male \cdot colgpa$$
+$$\qquad (2.86) \quad (3.96) \qquad \quad (0.98) \qquad \quad (1.383)$$
+$$n = 856 \quad R^2 = 0.349 \quad \bar R^2 = 0.347$$
+
+$$\widehat {score} = 30.36 + 3.82 male + 14.33 colgpa + 0.479 male \cdot (colgpa - 2.81)$$
+$$\qquad (2.86) \quad (0.74) \qquad \quad (0.98) \qquad \quad (1.383)$$
+$$n = 856 \quad R^2 = 0.349 \quad \bar R^2 = 0.347$$
+
+### (i)
+
+Interpret the coefficient on male in the second equation and construct a 95% confidence interval for $\beta_{male}$. Does the confidence interval exclude zero?
+
+``` {r 1i}
+regressao_1 <- lm(score ~ male + colgpa, data = econmath)
+
+#avg_score <- mean(econmath$score)
+avg_colgpa <- mean(econmath$colgpa)
+
+#b0 <- as.numeric(regressao_1$coefficients[1])
+b1 <- as.numeric(regressao_1$coefficients[2])
+#b2 <- as.numeric(regressao_1$coefficients[3]) * avg_colgpa
+
+#nota_homem_regressao <- b0 + b1 + b2
+#nota_mulher_regressao <- b0 + b2
+
+#se_bo <- 2.04
+se_b1 <- 0.74
+#se_b2 <- 0.69
+
+t_critico <- qt(p = 0.975, df = 853)
+
+ic_95 <- c((-t_critico * se_b1) + b1, (t_critico * se_b1) + b1) 
+print(ic_95)
+```
+<p>**R: O $\beta_{male}$ indica que homens performam melhor do que mulheres, uma diferença de 3,83 pontos percentuais, controlando por colgpa.**
+
+|Intervalo de Confiança 95%|
+|---|
+|$3,83 \pm 1,96 \times 0,74 = [2,37 - 5,28]$|
+
+**Como o zero não está incluído no intervalo, podemos concluir que o $\beta_{male}$ é estatisticamente significativo ao nível de 5%.**
+<p>
+
+### (ii)
+
+In the second equation, why is the estimate on male so imprecise? Should we now conclude that there are no gender differences in score after controlling for colgpa? [Hint: You might want to compute an F statistic for the null hypothesis that there is no gender difference in the model with the interaction.]
+
+``` {r 1ii}
+regressao_r <- lm(score ~ male + colgpa, data = econmath)
+regressao_ur <- lm(score ~ male + colgpa + male*colgpa, data = econmath)
+
+q <- regressao_r$df.residual - regressao_ur$df.residual
+df_ur <- regressao_ur$df.residual
+
+ssr_r <- sum(regressao_r$residuals^2)
+ssr_ur <- sum(regressao_ur$residuals^2)
+
+f <- ((ssr_r - ssr_ur)/ssr_ur)*(df_ur/q)
+qf(0.9, q, df_ur)
+```
+
+<p>**R: O estimador $\beta_{male}$ é impreciso pois possui um erro-padrão alto $(0,74)$. Ou seja, o estimador é incerto é pode divergir bastante do valor verdadeiro. Contudo não podemos concluir que não existem diferenças baseadas somente na imprecisão do modelo. Depois de conduzir a hipótese nula $H_0: \beta_{male*colgpa} = 0$, chegamos num valor $F = 0,12$. Dado que esse valor está muito abaixo do valor crítico de significância de 10% com $1$ e $\infty$ graus de liberadade: $2,71$. Portanto, não rejeitamos a hipótese. nula.**<p>
+
+### (iii)
+ 
+Compared with the third equation, why is the coefficient on male in the last equation so much closer to that in the second equation and just as precisely estimated?
+
+<p>**R: Na terceira equação, $\beta_{male*colgpa}$ é estimado em $0,479$ com erro padrão de $1,383$. Isso sugere que o efeito de interação não está bem determinado, o que pode ser devido ao fato de que o termo de interação é relativamente pequeno em comparação com os efeitos principais de $maale$ e $colgpa$.**
+
+**Na quarta equação, o termo de interação é substituído por uma variável $colgpa$ centrada, que é a diferença entre $colgpa$ e seu valor médio de $2,81$. Isso tem o efeito de centralizar o termo de interação em torno de um valor mais típico de $colgpa$, o que pode melhorar a precisão da estimativa.**
+
+**Como resultado dessas mudanças, $\beta_{male}$ na quarta equação é mais próximo do da segunda equação e estimado com a mesma precisão, com um erro padrão de $0,74$. Isso sugere que a inclusão da variável $colgp$a centrada melhorou a estimativa do efeito de interação.**<p>
+ 
+## 2. Exercícios 1 e 2 Capítulo 8
+
+### Ex.1 - Capítulo 8
+
+Which of the following are consequences of heteroskedasticity?
+
+(i) The OLS estimators, $\hat \beta_j$, are inconsistent.
+
+(ii) The usual F statistic no longer has an F distribution.
+
+(iii) The OLS estimators are no longer BLUE.
+
+<p>**R: Os itens (ii) e (iii). A consistência dos estimadores não é afetada pelo heterocedasticidade. Porém, a heterocedasticidade invalida a inferência baseadas na estatística t.**<p>
+
+### Ex.2 - Capítulo 8
+
+Consider a linear model to explain monthly beer consumption:
+
+$$beer = \beta_0 + \beta_1 inc + \beta_2 price + \beta_3 educ + \beta_4 female + u$$
+$E(u|inc, price, educ, female) = 0\\$
+$Var(u|inc, price, educ, female) = \sigma^2 inc^2\\$
+
+Write the transformed equation that has a homoskedastic error term.
+
+**R:**
+
+$$ Var(u|inc, price, educ, female) = \sigma^2 inc^2 $$
+$h(x)$ é função de heterocedasticidade, $h(x) = inc^2$. Então $\sqrt{h(x)} = inc$.
+Dividindo a equação por $inc$:
+$$\frac {beer}{inc} = \beta_0 \left(\frac{1}{inc}\right) + \beta_1 + 
+\beta_2 \left(\frac{price}{inc}\right) +
+\beta_3 \left(\frac{educ}{inc}\right) +
+\beta_4 \left(\frac{female}{inc}\right) +
+\left(\frac{u}{inc}\right)$$
+
+## 3.
+Utilizando os dados contidos no arquivo SLEEP75 obtemos a equação estimada
+
+$$\widehat {sleep_i} = 3.840,00 - 0,163totwork + 11,71educ - 8,70age + 0,128age^2 + 87,75male$$
+$$\quad\quad\quad(235,11) \qquad(0,018) \qquad\quad(5,86)  \qquad(11,21) \quad(0,134) \qquad(34,33)$$
+$$n = 706 \quad R^2 = 0,123, \bar R^2 = 0,117$$
+A variável $sleep$ é o total de minutos gastos por semana dormindo durante a noite, $totwrk$ é o total de minutos semanais gastos trabalhando, $educ$ e $age$ são medidas em anos e $male$ é uma variável dummy de gênero.
+
+### (a) 
+Supondo todos os fatores iguais, existe evidência que os homens durmam mais que as mulheres? O quanto essa evidência é forte?
+
+``` {r 3a}
+t_male <- 87.75 / 34.33
+print(t_male)
+```
+
+<p>**R: *Ceteris Paribus*, existe uma forte evidência, $t = 2,56$, de que os homens durmam mais que as mulheres**.<p>
+
+### (b) 
+Existe uma substituição estatisticamente significante entre trabalhar e dormir? Qual é a
+relação de substituição estimada?
+
+``` {r 3b}
+t_work <- 0.163 / 0.018
+work <- 0.163 * 60
+print(t_work)
+print(work)
+```
+
+<p>**R: *Ceteris Paribus*, existe uma forte evidência, $t = |9,06|$, de que o trabalho afeta negativamente o sono. Ou seja, quanto mais trabalho menos sono. Segundo o modelo o efeito de se trabalhar uma hora a mais por semana é a redução de aproximadamente 10 minutos de sono.**<p>
+
+### (c) 
+Que outras regressões você poderia executar para testar a hipótese nula de que, mantendo fixos os outros fatores, a idade não tem efeito sobre dormir?
+
+<p>**R: Podemos estimar um modelo sem $age$ e $age^2$. Quando ambos estão no modelo, $age$ não tem efeito**<p>
+
+## 4.
+Supondo que você tem o interesse de estimar a relação entre as variáveis $y$ e $x_1$. Para esse propósito você deve coletar os dados de outras duas variáveis de controle (explicativas), $x_2$ e $x_3$. Seja $\bar \beta_1$ a estimativa de $x_1$ na regressão simples de $y$ em $x_1$ e $\hat \beta_1$ a estimativa de $x_1$ na regressão múltipla de $y$ em $x_1$, $x_2$ e $x_3$.
+
+### (a) 
+Se $x_1$ for altamente correlacionado com $x_2$ e $x_3$ na amostra e $x_2$ e $x_3$ tiverem grandes efeitos parciais em $y$, você antecipa que $\hat \beta_1$ e $\bar \beta_1$ serão parecidos? Justifique.
+
+<p>**R: Como $x_1$ está altamente correlacionado com $x_2$ e $x_3$, e estas variáveis possuem efeitos parciais grandes sobre $y$, os coeficientes da regressão simples e múltipla podem diferir em grandes quantidades.**<p>
+
+### (b) 
+Se $x_1$ for quase não correlacionado com $x_2$ e $x_3$ na amostra, mas $x_2$ e $x_3$ forem altamente correlacionados, você antecipa que $\hat \beta_1$ e $\bar \beta_1$ serão parecidos? Justifique.
+
+<p>**R: Como a correlação entre $x_2$ e $x_3$ não afeta diretamente $x_1$, os resultados de $\hat \beta_1$ e $\bar \beta_1$ serão próximos.**<p>
+
+### (c) 
+Se $x_1$ for altamente correlacionado com $x_2$ e $x_3$ na amostra, mas $x_2$ e $x_3$ forem altamente correlacionados, você antecipa que o erro-padrão de $\bar \beta_1$ será menor que o erro-padrão de $\hat \beta_1$ Justifique.
+
+<p>**R: Adicionar $x_2$ e $x_3$ na regressão apesar do efeito parcial pequeno em $y$ irá causar multicolinearidade. Adicionar $x_2$ e $x_3$ aumenta o erro-padrão do coeficiente em $x_1$, logo $\hat \beta_1$ será maior que $\bar \beta_1$**<p>
